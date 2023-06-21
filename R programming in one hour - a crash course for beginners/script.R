@@ -40,7 +40,7 @@ data()
 View(Titanic)
 
 # Instalando e usando bibliotecas -------------------------------
-install.packages("tidyverse") #precisei instalar pacotes para conseguir compilar as libs
+#install.packages("tidyverse") #precisei instalar pacotes para conseguir compilar as libs
 library(tidyverse) 
 
 View(starwars)
@@ -157,4 +157,169 @@ starwars %>%
                   'short', #se verdadeiro
                   'tall')) #se falso
 
-#24:30
+# Reshape data com Pivot wider-----------------------------------------
+library(gapminder)
+library(tidyverse)
+View(gapminder)
+
+gapminder_data <- gapminder %>% 
+  select(
+    country, year, lifeExp
+  )
+View(gapminder_data)
+# Cria colunas para a expectativa de vida de cada ano
+gapminder_data<-gapminder_data %>% 
+  pivot_wider(
+    names_from = year,
+    values_from = lifeExp) 
+
+View(gapminder_data)
+
+# Reshape data com Pivot longer-----------------------------------------
+gapminder_data<-gapminder_data %>% #Reverte
+  pivot_longer(
+    2:13,
+    names_to = 'year',
+    values_to = 'lifeExp') 
+
+View(gapminder_data)
+
+#Pegando indicadores --------------------------------------------------
+View(msleep)
+min(msleep$awake)
+max(msleep$awake)
+range(msleep$awake)
+IQR(msleep$awake)
+mean(msleep$awake)
+median(msleep$awake)
+var(msleep$awake)
+summary(msleep$awake)
+
+# De mais de uma variável
+msleep %>% 
+  select(awake, sleep_total) %>% 
+  summary()
+
+#Criando tabelas a partir de colunas categóricas -----------------------
+table(msleep$vore)
+
+#Visualização de dados ---------------------------------------------
+plot(pressure)
+
+#graficos de barras
+ggplot(
+  data=starwars,
+  mapping = aes(x=gender)
+) + geom_bar()
+
+#histograma
+starwars %>% 
+  drop_na(height) %>% 
+  ggplot(
+    mapping = aes(x = height)
+  )+
+  geom_histogram()
+
+starwars %>% 
+  drop_na(height) %>% 
+  ggplot(
+    aes(x = height)# ele atribui ao mapping por padrão
+  )+
+  geom_histogram()
+
+#diagramas de caixa
+starwars %>% 
+  drop_na(height) %>% 
+  ggplot(aes(x = height))+
+  geom_boxplot(fill = 'red')+
+  theme_bw()+
+  labs(title = 'Diagrama de caixa - Altura',
+       x='Altura dos personagens')
+
+# density plot
+starwars %>% 
+  drop_na(height) %>% 
+  filter(sex %in% c('male', 'female')) %>% 
+  ggplot(aes(
+    height, #pode omitir o x = height
+    color = sex,
+    fill = sex))+
+  geom_density(alpha = 0.3)+
+  theme_bw()+
+  labs(title = 'Gráfico de densidade',
+       x='Altura dos personagens')
+
+#gráficos de dispersão
+starwars %>% 
+  filter(mass < 200) %>% 
+  ggplot(aes(height, mass, color = sex))+
+  geom_point(size = 2, alpha = 0.6)+
+  theme_minimal()+
+  labs(title = 'Gráfico de dispersão')
+
+#Suavização
+starwars %>% 
+  filter(mass < 200) %>% 
+  ggplot(aes(height, mass, color = sex))+
+  geom_point(size = 2, alpha = 0.6)+
+  geom_smooth()+
+  facet_wrap(~sex)+
+  theme_minimal()+
+  labs(title = 'Gráfico de dispersão')
+
+# Testagem de hipóteses -----------------------
+View(gapminder)
+
+gapminder %>% 
+  filter(continent %in% c('Americas', 'Europe')) %>% 
+  t.test(lifeExp ~ continent, data=.,
+         altrnative = 'two.sided',
+         paired = FALSE
+         )
+#Anova ----------------------------------------
+gapminder %>% 
+  filter(year == 2007) %>% 
+  filter(continent %in% c('Africa', 'Americas', 'Europe', 'Asia')) %>% 
+  aov(lifeExp ~continent, data = .) %>% 
+  summary()
+
+gapminder %>% 
+  filter(year == 2007) %>% 
+  filter(continent %in% c('Africa', 'Americas', 'Europe', 'Asia')) %>% 
+  aov(lifeExp ~continent, data = .) %>% 
+  TukeyHSD()
+
+gapminder %>% 
+  filter(year == 2007) %>% 
+  filter(continent %in% c('Africa', 'Americas', 'Europe', 'Asia')) %>% 
+  aov(lifeExp ~continent, data = .) %>% 
+  TukeyHSD() %>% 
+  plot()
+
+#Qui-quadrado --------------------------------------------------
+head(iris)
+flowers <- iris %>% 
+  mutate(Size = cut(Sepal.Length,
+                    breaks = 3,
+                    labels = c('Pequena', 'Média', 'Grande'))) %>% 
+  select(Species, Size)
+
+View(flowers)
+
+flowers %>% 
+  select(Size) %>% 
+  table() %>% 
+  chisq.test()
+
+flowers %>% 
+  table() %>% 
+  chisq.test()
+
+#Modelo linear --------------------------------------
+cars %>% 
+  lm(dist ~speed, data=.) %>% 
+  summary()
+
+cars %>% 
+  lm(dist ~speed, data=.) %>% 
+  plot()
